@@ -1,0 +1,17 @@
+{
+    "name": "lbernardo/maketable",
+    "description": "Versionamento de tabela de banco de dados (Criar, Editar)",
+    "type": "project",
+    "authors": [
+        {
+            "name": "lbernardo",
+            "email": "lbernardo.brito@gmail.com"
+        }
+    ],
+    "autoload":{
+        "psr-4":{
+            "MakeTable\\":"src/MakeTable/"
+        }
+    },
+    "require": {}
+}
