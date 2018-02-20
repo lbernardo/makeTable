@@ -11,7 +11,7 @@
 $command = isset($argv[1]) ? $argv[1] : null;
 
 // Config
-$GLOBALS['config'] = include __DIR__."/config.php";
+$GLOBALS['__mk_config__'] = include __DIR__."/config.php";
 
 // List configs
 $list_tables = [];
@@ -19,8 +19,8 @@ $list_tables = [];
 $list_migrates = [];
 
 // Connect default
-if (isset($GLOBALS['config']['default'])) {
-    $config = $GLOBALS['config']['default'];
+if (isset($GLOBALS['__mk_config__']['default'])) {
+    $config = $GLOBALS['__mk_config__']['default'];
     $PDO = new \PDO("mysql:host={$config['host']};dbname={$config['dbname']}",$config['username'],$config['password']);
 
     // Verify migrations

@@ -24,9 +24,17 @@ class Table extends Struct {
     public function make()
     {
        if ($this->type == 'create') {
-           $sql = "CREATE TABLE `{$this->table}`  ".implode(",",$this->getCols());
-       } else {
+
+           // Verify primary
+           if ($this->primaryKey){
+               $primary = ", PRIMARY KEY ({$this->primaryKey})";
+           }
+
+           $sql = "CREATE TABLE `{$this->table}`  (".implode(",",$this->getCols())." {$primary})";
+       } elseif ($this->type == 'alter') {
            $sql = "ALTER TABLE `{$this->table}` ADD ".implode(" ADD ",$this->getCols());
+       } elseif ($this->type == 'drop') {
+           $sql  = "DROP TABLE `{$this->table}` ";
        }
 
        return $sql;
@@ -43,7 +51,7 @@ class Table extends Struct {
             $sql = $this->make();
         }
 
-        $config = $GLOBALS['config'][$this->db];
+        $config = $GLOBALS['__mk_config__'][$this->db];
 
         if (!$config) {
             print "\033[01;31mError Database config\033[0m\n";
@@ -80,6 +88,17 @@ class Table extends Struct {
     {
         $Table = new Table($table,$db,'alter');
         return $Table;
+    }
+
+    /**
+     * Drop table
+     * @param $table
+     * @param $db
+     * @return Table
+     */
+    public static function drop($table,$db = 'default'){
+        $Table = new Table($table,$db,'drop');
+        $Table->execute();
     }
 
 

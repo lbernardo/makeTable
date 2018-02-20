@@ -15,7 +15,7 @@ class v1519090093_CreateTable {
 
 	public function down()
 	{
-
+        Table::drop("user");
 	}
 
 }
