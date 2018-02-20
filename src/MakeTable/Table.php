@@ -5,98 +5,83 @@ class Table extends Struct {
 
     var $table;
     var $type;
+    var $db;
 
-    public function __construct($table, $type)
-    {
-        $this->setTable($table);
-        $this->setType($type);
-    }
 
     /**
-     * @return mixed
+     * Table constructor.
+     * @param $table
+     * @param string $db
+     * @param string $type
      */
-    public function getTable()
-    {
-        return $this->table;
-    }
-
-    /**
-     * @param mixed $table
-     */
-    public function setTable($table)
+    public function __construct($table,$db = 'default',$type = 'create')
     {
         $this->table = $table;
-    }
-
-    /**
-     * @return mixed
-     */
-    public function getType()
-    {
-        return $this->type;
-    }
-
-    /**
-     * @param mixed $type
-     */
-    public function setType($type)
-    {
+        $this->db = $db;
         $this->type = $type;
     }
 
-
-    public function make(){
-
-        // Check Type
-        if ($this->getType() == "create") {
-            $cols = implode(",",$this->getCols());
-            $sql = "CREATE TABLE `{$this->getTable()}` ({$cols})";
-            // Check Exists Primary Key
-            if ($this->primaryKey) {
-                $sql.=" PRIMARY KEY (`{$this->primaryKey}`)";
-            }
-        }
-
-
-        return $sql;
-
-
-    }
-
-
-
-    /**
-     * Create new table
-     * @param $table
-     * @param $callback
-     */
-    public static function create($table, $callback)
+    public function make()
     {
-        $Table = new Table($table,'create');
-        // Callback
-        $callback($Table);
+       if ($this->type == 'create') {
+           $sql = "CREATE TABLE `{$this->table}`  ".implode(",",$this->getCols());
+       } else {
+           $sql = "ALTER TABLE `{$this->table}` ADD ".implode(" ADD ",$this->getCols());
+       }
+
+       return $sql;
     }
+
 
     /**
      * Execute SQL
-     * @param string $db
      * @param null $sql
      */
-    public function execute($db = 'default',$sql = null)
+    public function execute($sql = null)
     {
         if ($sql == null) {
             $sql = $this->make();
         }
 
-        $database = $GLOBALS['config'][$db];
-        $PDO = new PDO("mysql:host={$database['host']};dbname={$database['dbname']}",$database['user'],$database['pass']);
+        $config = $GLOBALS['config'][$this->db];
 
-        if ($PDO->query($sql)){
-            print "\033[01;32m{$sql} [OK]\033[0m\n";
-        }else{
-            print "\033[01;31m{$sql} [ERRO]\033[0m\n";
+        if (!$config) {
+            print "\033[01;31mError Database config\033[0m\n";
         }
 
+        $PDO = new \PDO("mysql:host={$config['host']};dbname={$config['dbname']}",$config['username'],$config['password']);
+
+        $PDO->query($sql);
+
     }
+
+
+    /**
+     * Create table
+     * @param $table
+     * @param string $db
+     * @return Table
+     */
+    public static function create($table,$db = 'default')
+    {
+        $Table = new Table($table,$db);
+        return $Table;
+    }
+
+
+
+    /**
+     * Alter table
+     * @param $table
+     * @param string $db
+     * @return Table
+     */
+    public static function alter($table,$db = 'default')
+    {
+        $Table = new Table($table,$db,'alter');
+        return $Table;
+    }
+
+
 
 }
